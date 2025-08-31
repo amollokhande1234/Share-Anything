@@ -8,5 +8,5 @@ class AppConfig {
   static const LostAndFoundCollectionId = '68ab8647003246c8aa62';
   static const BucketId = '68a639e90012349dad91';
   static const EndPoints = 'https://cloud.appwrite.io/v1';
-  static const FileShareCollectionId = '68ac3f7a00103e478f4f';
+  static const FileShareCollectionId = '68b45068001731a8fa8a';
 }

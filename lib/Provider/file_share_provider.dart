@@ -1,8 +1,11 @@
-import 'dart:typed_data';
+import 'dart:io';
+import 'dart:html' as html;
 
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shareanything/app_config.dart';
 
@@ -16,120 +19,168 @@ class FileShareProvider extends ChangeNotifier {
 
   // Configuration
   static const String bucketId = AppConfig.BucketId;
-  static const String databaseId = AppConfig.FileShareCollectionId;
+  // static const String databaseId = AppConfig.FileShareCollectionId;
   static const String collectionId = "";
 
   // Data list
-  List<Map<String, dynamic>> _files = [];
+  // List<Map<String, dynamic>> _files = [];
 
   bool _isLoading = false;
   String? _error;
 
   // Getters
-  List<Map<String, dynamic>> get files => _files;
+  // List<Map<String, dynamic>> get files => _files;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // Upload Function
-  Future<bool> uploadFile({
-    required PlatformFile file,
-    required bool isPrivate,
-    required String userId,
-    String password = "",
-  }) async {
+  List<FileData> _files = [];
+
+  List<FileData> get files => _files;
+  List<Document> allFiles = [];
+
+  Future<Uint8List?> getFilePreview(String fileId) async {
     try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
+      final client = Client()
+          .setEndpoint('https://cloud.appwrite.io/v1')
+          .setProject(AppConfig.ProjectId);
 
-      // Upload file to storage
-      final uploadedFile = await storage.createFile(
-        bucketId: bucketId,
-        fileId: ID.unique(),
-        file: InputFile.fromBytes(bytes: file.bytes!, filename: file.name),
+      final storage = Storage(client);
+
+      // For previewable formats (image/pdf), use getFilePreview
+      final result = await storage.getFileView(
+        bucketId: AppConfig.BucketId,
+        fileId: fileId,
       );
 
-      // Get file URL
-      final fileUrl =
-          storage
-              .getFileDownload(bucketId: bucketId, fileId: uploadedFile.$id)
-              .toString();
+      return result;
+    } catch (e) {
+      print("💀 Error fetching file: $e");
+      return null;
+    }
+  }
 
-      // Prepare data for database
-      final fileData = {
-        'fileName': file.name,
-        'url': fileUrl,
-        'time': DateTime.now().toIso8601String(),
-        'isPrivate': isPrivate,
-        'password': isPrivate ? password : "",
-        'userId': userId,
-        'fileId': uploadedFile.$id,
-      };
+  Future<bool?> uploadFileWeb(
+    PlatformFile? selectedFile,
+    int index,
+    String password,
+  ) async {
+    try {
+      if (selectedFile != null && selectedFile.bytes != null) {
+        final fileBytes = selectedFile.bytes!;
+        final fileName = selectedFile.name;
 
-      // Save to database
-      await databases.createDocument(
-        databaseId: databaseId,
-        collectionId: collectionId,
-        documentId: ID.unique(),
-        data: fileData,
+        // Upload file to Appwrite
+        final response = await storage.createFile(
+          bucketId: AppConfig.BucketId, // Appwrite storage bucket
+          fileId: ID.unique(),
+          file: InputFile(bytes: fileBytes, filename: fileName),
+        );
+
+        print('File uploaded successfully! File ID: ${response.$id}');
+        notifyListeners();
+        return uploadtoDatabse(fileName, index, response.$id, password);
+      } else {
+        print('No file selected');
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      print('Error uploading file: $e');
+      return null;
+    }
+  }
+
+  // Upload to the Database
+  Future<bool> uploadtoDatabse(
+    String fileName,
+    int index,
+    String id,
+    String password,
+  ) async {
+    try {
+      // if (isPrivate == true) {
+      final _newFileData = await databases.createDocument(
+        databaseId: AppConfig.DatabseId,
+        collectionId: AppConfig.FileShareCollectionId,
+        documentId: 'unique()',
+        data: {
+          'fileName': fileName,
+          'isPrivate': index == 0 ? false : true,
+          'password': index == 0 ? null : password,
+          'fileId': id,
+          'time': DateTime.now().toIso8601String().toString(),
+        },
+        permissions: [
+          Permission.read(Role.any()),
+          Permission.write(Role.any()),
+        ],
       );
-
-      // Add to local list
-      files.add(fileData);
-
-      _isLoading = false;
+      debugPrint("✅ Message sent: ${_newFileData.data}");
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
+      debugPrint("💀 Appwrite Error: $e");
       return false;
     }
   }
 
-  // Fetch Function
-  Future<void> fetchFiles({String? userId}) async {
+  Future<void> fetchFiles() async {
     try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
-
-      List<String> queries = [Query.orderDesc('time')];
-
-      // If userId provided, get user's files, otherwise get all public files
-      if (userId != null) {
-        queries.add(Query.equal('userId', userId));
-      } else {
-        queries.add(Query.equal('isPrivate', false));
-      }
-
-      final response = await databases.listDocuments(
-        databaseId: databaseId,
-        collectionId: collectionId,
-        queries: queries,
+      final result = await databases.listDocuments(
+        databaseId: AppConfig.DatabseId,
+        collectionId: AppConfig.FileShareCollectionId,
       );
-
-      _files =
-          response.documents.map((doc) {
-            final data = doc.data;
-            return {
-              'fileName': data['fileName'] ?? '',
-              'url': data['url'] ?? '',
-              'time': data['time'] ?? '',
-              'isPrivate': data['isPrivate'] ?? false,
-              'password': data['password'] ?? '',
-              'userId': data['userId'] ?? '',
-              'fileId': data['fileId'] ?? '',
-            };
-          }).toList();
-
-      _isLoading = false;
+      allFiles = result.documents;
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
+      print("Error fetching messages: $e");
     }
   }
+
+  bool validatePassword(String fileId, String enteredPassword) {
+    final file = _files.firstWhere((f) => f.id == fileId);
+    return file.password == enteredPassword;
+  }
+
+  Future<File> getFileBytes(String fileId) async {
+    try {
+      final bytes = await storage.getFile(
+        fileId: fileId,
+        bucketId: AppConfig.BucketId,
+      );
+      return bytes; // Uint8List of file content
+    } catch (e) {
+      print("Download error: $e");
+      rethrow;
+    }
+  }
+
+  // download files
+  static void downloadFileWeb(Uint8List bytes, String filename) {
+    final blob = html.Blob([bytes]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor =
+        html.document.createElement('a') as html.AnchorElement
+          ..href = url
+          ..download = filename
+          ..style.display = 'none';
+    html.document.body!.children.add(anchor);
+    anchor.click();
+    html.document.body!.children.remove(anchor);
+    html.Url.revokeObjectUrl(url);
+  }
+}
+
+class FileData {
+  final String id;
+  final String name;
+  final String access;
+  final String password;
+
+  FileData({
+    required this.id,
+    required this.name,
+    required this.access,
+    required this.password,
+  });
 }
