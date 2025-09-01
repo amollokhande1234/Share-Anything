@@ -17,9 +17,9 @@ void main() async {
 
   try {
     await account.createAnonymousSession();
-    debugPrint("✅ Anonymous session created");
+    // debugPrint("✅ Anonymous session created");
   } catch (e) {
-    debugPrint("⚠️ Anonymous session may already exist: $e");
+    // debugPrint("⚠️ Anonymous session may already exist: $e");
   }
   final storage = Storage(client);
   final databases = Databases(client);

@@ -20,7 +20,7 @@ class _SideBarPageState extends State<SideBarPage> {
     {"icon": Icons.public, "title": "Public Messages"},
     {"icon": Icons.lock, "title": "Private Messages"},
     {"icon": Icons.file_copy, "title": "File Share"},
-    {"icon": Icons.search, "title": "Lost and Found"},
+    // {"icon": Icons.search, "title": "Lost and Found"},
   ];
 
   int _idx = 0;
@@ -31,6 +31,27 @@ class _SideBarPageState extends State<SideBarPage> {
     return Consumer<SideBarProvider>(
       builder: (ctx, provider, __) {
         return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "Code Share",
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            centerTitle: true,
+            elevation: 6,
+            backgroundColor: Colors.transparent,
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue, Colors.purple],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(20),
+                ),
+              ),
+            ),
+          ),
           body: Row(
             children: [
               Expanded(
@@ -79,8 +100,6 @@ class _SideBarPageState extends State<SideBarPage> {
                       case 2:
                         return FileSharePage();
                       case 3:
-                        return LostAndFoundPage();
-                      case 4:
                         return PrivateMessagesPage();
                       default:
                         return Center(child: Text("Select a Module"));
@@ -107,6 +126,6 @@ final List<SideBarItem> sideBarList = [
   SideBarItem(icon: Icons.home, title: "Home"),
   SideBarItem(icon: Icons.public, title: "Public Messages"),
   SideBarItem(icon: Icons.file_copy, title: "File Share"),
-  SideBarItem(icon: Icons.search, title: "Lost and Found"),
+  // SideBarItem(icon: Icons.search, title: "Lost and Found"),
   SideBarItem(icon: Icons.lock, title: "Private Messages"),
 ];

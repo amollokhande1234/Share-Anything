@@ -41,9 +41,9 @@ Widget HomePage(double size) {
 
               const SizedBox(height: 16),
 
-              _reusableCard(double.infinity, Colors.red.shade100, () {
-                context.read<SideBarProvider>().changeIndex(5);
-              }, "Module 5 (100%)"),
+              // _reusableCard(double.infinity, Colors.red.shade100, () {
+              //   context.read<SideBarProvider>().changeIndex(5);
+              // }, "Module 5 (100%)"),
             ],
           ),
         ),

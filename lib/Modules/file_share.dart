@@ -91,15 +91,11 @@ class _FileSharePageState extends State<FileSharePage> {
                                             child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(12),
-                                              child: Column(
-                                                children: [
-                                                  InteractiveViewer(
-                                                    child: Image.memory(
-                                                      snapshot.data!,
-                                                      fit: BoxFit.contain,
-                                                    ),
-                                                  ),
-                                                ],
+                                              child: InteractiveViewer(
+                                                child: Image.memory(
+                                                  snapshot.data!,
+                                                  fit: BoxFit.contain,
+                                                ),
                                               ),
                                             ),
                                           ),
