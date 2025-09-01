@@ -1,16 +1,26 @@
-# shareanything
+# 🔗 Code Share Project
 
-A new Flutter project.
+A simple and secure **file sharing application** built with Flutter and Appwrite.  
+Users can upload files, share them via password-protected links, and download them securely.  
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Features
+- 📤 Upload files securely  
+- 🔑 Password-protected file sharing  
+- 📂 Manage uploaded files in the dashboard  
+- 📥 Download shared files with authentication  
+- 🌐 Backend powered by **Appwrite**  
+- 🎨 Clean and responsive UI  
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 📸 Screenshots
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+| Home Screen | PublicMessages Screen | PrivateMessages Screen | File Share Screen |
+|-------------|-----------------------|------------------------|-------------------|
+| ![Home](assets/outputs/HomePage.png) | ![Public](assets/outputs/PublicSection.png) | ![Private](assets/outputs/PrivateMessages.png) | ![Private](assets/outputs/PrivateMessages.png) | ![Private](assets/outputs/PrivateFilePassword.png) | ![FileShare](assets/outputs/FileShare.png) | ![FileShare](assets/outputs/FileAddSection.png) | ![FileShare](assets/outputs/DownloadFiles.png) |
+
+*(Add your screenshots inside `assets/screenshots/` and update the paths here.)*
+
+---
